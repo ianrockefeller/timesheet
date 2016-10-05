@@ -1,0 +1,563 @@
+{% block content %}
+<div id="floatingtimestableheader" style="position: fixed; top: 0; display: none;">
+  <!-- <div class="leftarrow"><a href="/timetracker/{{user.username}}/{{lastweek}}">&lsaquo;</a></div> -->
+  <table class="table table-bordered" style="">
+<tr  style="text-align: center; background-color: #007ac4; color: white;">
+  <th id="fP">Project</th>
+  <th id="fT">Task</th>
+  <th id="fM">Monday<br/>{{dates.0}}</th>
+  <th id="fTu">Tuesday<br/>{{dates.1}}</th>
+  <th id="fW">Wednesday<br/>{{dates.2}}</th>
+  <th id="fTh">Thursday<br/>{{dates.3}}</th>
+  <th id="fF">Friday<br/>{{dates.4}}</th>
+  <th id="fS">Saturday<br/>{{dates.5}}</th>
+  <th id="fSu">Sunday<br/>{{dates.6}}</th>
+  <th id="fD">Delete?</th>
+</tr>
+</table>
+<!-- <div class="rightarrow"><a href="/timetracker/{{user.username}}/{{nextweek}}">&rsaquo;</a></div> -->
+</div>
+
+<div style="margin-top: 2em; display:flex; justify-content:space-between;">
+
+<div style="display: inline-block; vertical-align: top;">
+  <h3 id="user_header">{{user.first_name}}: {{user.userprofile.role.name}}</h3>
+  <p>
+    <form id="date_picker_form" onchange="submitDatePickerForm('{{user.username}}')">
+      <b>Date:</b> <input id="date_picker_input" type="text" value="{{date_picked}}" readonly />
+    </form>
+  </p>
+</div>
+
+<div style="display: inline-block; width: 285px; padding: 0 1em;">
+
+    <div style="vertical-align: top; margin: 0 1em .5em 0; width: 165px;">
+      <div style="font-size: 1.75em;">Timer</div>
+      <div style="font-size: 2em; text-align: center;"><span id="time"></span></div>
+    </div>
+  <div style="width:100%;">
+    <input id="start_timer" type="button" class="btn btn-success" value="Start" onclick="start();" style="margin-right: .5em;" />
+    <input id="stop_timer" type="button" class="btn btn-danger" value="Stop" onclick="stop();" style="margin-right: .5em;" />    
+    <input id="save_timer" type="button" class="btn btn-primary" value="Enter Time" onclick="saveTime();" />
+  </div>
+</div>
+
+<div id="project_task_container" style="display: inline-block; margin-right: 2em;">
+<form id="project_task_form" action="" method="post">
+  {% csrf_token %}
+
+  <p><b>Project: </b>{{ project_task_form.project }}</p>
+  <p><b>Category: </b>{{ category_form.category }}</p>
+  <p><b>Task: </b>{{ project_task_form.task }}</p>
+  <input id="add_task_button" type="submit" value="Add Task" name="project_task" class="btn btn-primary" /> 
+  <input type="hidden" value="/timetracker/{{user.username}}/{{date_picked}}" name="next" />
+</form>
+</div>
+
+</div>
+
+<div id="calendar" style="margin-top: 2em; display: flex; align-items: center; justify-content: center;">
+<!-- <div class="leftarrow"><a href="/timetracker/{{user.username}}/{{lastweek}}">&lsaquo;</a></div> -->
+<form id="calendar_form" action="{% url 'save_time' user.username %}" method="post">
+{% csrf_token %}
+<input id="calendar_start_date" type="hidden" name="monday" value="{{date_picked}}" />
+<table id="time_table" class="table table-bordered">
+<tr id="timestableheader" style="text-align: center; background-color: #007ac4; color: white;">
+  <th id="P">Project</th>
+  <th id="T">Task</th>
+  <th id="M">Monday<br/>{{dates.0}}</th>
+  <th id="Tu">Tuesday<br/>{{dates.1}}</th>
+  <th id="W">Wednesday<br/>{{dates.2}}</th>
+  <th id="Th">Thursday<br/>{{dates.3}}</th>
+  <th id="F">Friday<br/>{{dates.4}}</th>
+  <th id="S">Saturday<br/>{{dates.5}}</th>
+  <th id="Su">Sunday<br/>{{dates.6}}</th>
+  <th id="D">Delete?</th>
+</tr>
+{% for project_task in calendar %}
+<tr>
+  <td>{{ project_task.0 }}</td>
+  <td>{{ project_task.1 }}</td>
+  {% for week in project_task.2 %}
+    <td 
+      id="r{{forloop.parentloop.counter}}_c{{forloop.counter}}" 
+      class="time-cell"
+      onclick="clickCell('r{{forloop.parentloop.counter}}_c{{forloop.counter}}')"
+      style="cursor: pointer;">
+      <div class="duration-display">
+        {% if week %}{{ week.0.duration|floatformat:"-2" }}{% endif %}
+      </div>
+      <div class="duration-form">
+        <input 
+          class="duration-input" 
+          value="{% if week.0.duration %}{{week.0.duration|floatformat:'-2'}}{% else %}0{% endif %}" 
+          size="3"
+          onchange="editCell('r{{forloop.parentloop.counter}}_c{{forloop.counter}}')" 
+          name="{% if week.0.duration %}tid{{week.0.id}}{% else %}ptid{{project_task.3}}{% endif %}_day{{forloop.counter}}" />
+      </div>
+    </td>
+  {% endfor %}
+  <td 
+    id="delete{{forloop.parentloop.counter}}" 
+    style="vertical-align: middle; text-align: center;">
+    <a href="/timetracker/delete/projecttask/{{project_task.3}}/?next=/timetracker/{{user.username}}/{{date_picked}}" style="color: red;"><b>X</b></a>
+  </td>
+</tr>
+{% endfor %}
+<tr class="no-hover">
+  <td colspan="2">Total</td>
+  {% for duration_total in duration_totals %}
+    <td id="total{{forloop.counter}}">{{ duration_total|floatformat:"-2" }}</td>
+  {% endfor %}
+  <td id="table_total">{{ totals_sum|floatformat:"-2" }}</td>
+</tr>
+</table>
+<div>
+  <input 
+    class="btn btn-success"
+    type="submit" 
+    value="Save Table" 
+    name="calendar_submit" />
+</div>
+</form>
+<!-- <div class="rightarrow"><a href="/timetracker/{{user.username}}/{{nextweek}}">&rsaquo;</a></div> -->
+</div>
+
+<div>
+<table class="table table-bordered" style="margin-top: 3em; width: 425px; margin-bottom: 0;">
+<tr><th>Project</th><th>Total Time</th></tr>
+{% for k,v in project_totals.items %}
+<tr>
+  <td>{{ k }}</td>
+  <td>{{ v|floatformat:"-2" }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+<script>
+//  Simple example of using private variables
+//
+//  To start the stopwatch:
+//    obj.start();
+//
+//  To get the duration in milliseconds without pausing / resuming:
+//    var x = obj.time();
+//
+//  To pause the stopwatch:
+//    var x = obj.stop(); // Result is duration in milliseconds
+//
+//  To resume a paused stopwatch
+//    var x = obj.start();  // Result is duration in milliseconds
+//
+//  To reset a paused stopwatch
+//    obj.stop();
+//
+var clsStopwatch = function(startTime) {
+    var now = function() {
+        return (new Date()).getTime(); 
+      };
+
+    // Private vars
+    var startAt = startTime ? now() - (startTime * 60 * 60 * 1000)  : 0;  // Time of last start / resume. (0 if not running)
+    var lapTime = 0;  // Time on the clock when last stopped in milliseconds
+
+    this.duration = 0;
+    this.running = false;
+
+    var calculateDuration = function() {
+        var t = x.time();
+
+        var hrs = Math.floor(t / (60 * 60 * 1000));
+
+        t = t % (60 * 60 * 1000);
+
+        var mins = Math.floor(t / (60 * 1000));
+        
+        mins = (Math.round(mins / 60 * 4) / 4).toFixed(2);
+
+        var d = parseFloat(hrs) + parseFloat(mins);
+
+        return d
+    };
+
+    // Public methods
+    // Start or resume
+    this.start = function() {
+        startAt = startAt ? startAt : now();
+      };
+
+    // Stop or pause
+    this.stop = function() {
+        // If running, update elapsed time otherwise keep it
+        lapTime = startAt ? lapTime + now() - startAt : lapTime;
+        startAt = 0; // Paused
+
+        this.duration = calculateDuration();
+      };
+
+    // Reset
+    this.reset = function() {
+        lapTime = startAt = 0;
+      };
+
+    // Duration
+    this.time = function() {
+        return lapTime + (startAt ? now() - startAt : 0); 
+      };
+  };
+
+var x = new clsStopwatch();
+var $time;
+var clocktimer;
+
+function pad(num, size) {
+  var s = "0000" + num;
+  return s.substr(s.length - size);
+}
+
+function formatTime(time) {
+  var h = m = s = ms = 0;
+  var newTime = '';
+
+  h = Math.floor( time / (60 * 60 * 1000) );
+  time = time % (60 * 60 * 1000);
+  m = Math.floor( time / (60 * 1000) );
+  time = time % (60 * 1000);
+  s = Math.floor( time / 1000 );
+  ms = time % 1000;
+  newTime = pad(h, 2) + ':' + pad(m, 2) + ':' + pad(s, 2);
+  return newTime;
+}
+
+function show() {
+  $time = document.getElementById('time');
+  update();
+}
+
+function update() {
+  $time.innerHTML = formatTime(x.time());
+}
+
+function start() {
+  clocktimer = setInterval("update()", 1);
+  x.start();
+  $('#stop_timer').prop('disabled', false);
+  $('#save_timer').prop('disabled', true);
+  x.running = true;
+}
+
+function stop() {
+  x.stop();
+  clearInterval(clocktimer);
+  $('#save_timer').prop('disabled', false);
+  x.running = false;
+}
+
+function reset() {
+  stop();
+  x.reset();
+  update();
+}
+
+document.body.onload = show();
+
+/* 
+    Global Vars
+ */
+var project_selected = false;
+var task_selected = false;
+var last_id = null;
+var last_value = null;
+var input_value = null;
+var input_id = '';
+var highlight_id = null;
+var last_highlight_id = null;
+
+var timestable_width = 0;
+
+var P_height = document.getElementById('P').offsetWidth;
+var T_height = document.getElementById('T').offsetWidth;
+var M_height = document.getElementById('M').offsetWidth;
+var Tu_height = document.getElementById('Tu').offsetWidth;
+var W_height = document.getElementById('W').offsetWidth;
+var Th_height = document.getElementById('Th').offsetWidth;
+var F_height = document.getElementById('F').offsetWidth;
+var S_height = document.getElementById('S').offsetWidth;
+var Su_height = document.getElementById('Su').offsetWidth;
+var D_height = document.getElementById('D').offsetWidth;
+
+document.getElementById('fP').style.width = P_height+'px';
+document.getElementById('fT').style.width = T_height+'px';
+document.getElementById('fM').style.width = M_height+'px';
+document.getElementById('fTu').style.width = Tu_height+'px';
+document.getElementById('fW').style.width = W_height+'px';
+document.getElementById('fTh').style.width = Th_height+'px';
+document.getElementById('fF').style.width = F_height+'px';
+document.getElementById('fS').style.width = S_height+'px';
+document.getElementById('fSu').style.width = Su_height+'px';
+document.getElementById('fD').style.width = D_height+'px';
+
+document.getElementById('floatingtimestableheader').style.width = document.getElementById('calendar_form').offsetWidth;
+
+timestable_width = ( $(window).width() - $('#calendar_form').width() ) / 2;
+
+/*
+    Functions
+*/
+function checkVisible(elm) {
+  // set height offset of table header 
+
+  var rect = elm.getBoundingClientRect();
+  var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+}
+
+function setupFloatingTableHeader() {
+  P_height = document.getElementById('P').offsetWidth;
+  T_height = document.getElementById('T').offsetWidth;
+  M_height = document.getElementById('M').offsetWidth;
+  Tu_height = document.getElementById('Tu').offsetWidth;
+  W_height = document.getElementById('W').offsetWidth;
+  Th_height = document.getElementById('Th').offsetWidth;
+  F_height = document.getElementById('F').offsetWidth;
+  S_height = document.getElementById('S').offsetWidth;
+  Su_height = document.getElementById('Su').offsetWidth;
+  D_height = document.getElementById('D').offsetWidth;
+
+  document.getElementById('fP').style.width = P_height+'px';
+  document.getElementById('fT').style.width = T_height+'px';
+  document.getElementById('fM').style.width = M_height+'px';
+  document.getElementById('fTu').style.width = Tu_height+'px';
+  document.getElementById('fW').style.width = W_height+'px';
+  document.getElementById('fTh').style.width = Th_height+'px';
+  document.getElementById('fF').style.width = F_height+'px';
+  document.getElementById('fS').style.width = S_height+'px';
+  document.getElementById('fSu').style.width = Su_height+'px';
+  document.getElementById('fD').style.width = D_height+'px';
+
+  timestable_width = ( $(window).width() - $('#calendar_form').width() ) / 2;
+
+  document.getElementById('floatingtimestableheader').style.left = timestable_width;
+
+  document.getElementById('floatingtimestableheader').style.width = document.getElementById('calendar_form').offsetWidth;
+
+  if($(window).width() < $('#calendar_form').width()) {
+    document.getElementById('floatingtimestableheader').style.display = 'none';
+  }   
+}
+
+$(window).on('resize', function() {
+  setupFloatingTableHeader();
+});
+
+// on scroll
+$(window).on('scroll',function(){
+  var timestableheader = document.getElementById('timestableheader');
+  var floatingtimestableheader = document.getElementById('floatingtimestableheader');
+
+  if (checkVisible(timestableheader)) {
+    floatingtimestableheader.style.display = 'none';
+  } else if($(window).width() > $('#calendar_form').width()) {
+    floatingtimestableheader.style.display = 'block';
+    setupFloatingTableHeader();
+  }
+});
+
+function checkNumberInput(n) {
+  if(!$.isNumeric(n) || n < 0) { // > 
+    return 0;
+  }
+  return n;
+}
+
+function saveTime() {
+  $("#" + input_id + " .duration-input").val(x.duration);
+}
+
+function clickCell(id) {
+  input_id = id;
+
+  // if the cell clicked is already opened, do nothing
+  if(id === last_id) {
+    return false;
+  }
+
+  last_highlight_id = highlight_id;
+  highlight_id = id;
+
+  $("#" + highlight_id).css({'background-color': '#ffeb99'});
+
+  if(last_highlight_id !== null) {
+    $("#" + last_highlight_id).css({'background-color': 'initial'});
+  }
+  
+  var duration_input = $("#" + id + " .duration-input").val();
+  var duration_input = duration_input ? duration_input : 0;
+
+  last_value = parseFloat(duration_input);
+
+  $('#start_timer').prop('disabled', false);
+
+  if(x.running) {
+    stop();  
+  }
+  $('#start_timer').prop('disabled', false);
+  $('#stop_timer').prop('disabled', true);
+  $('#save_timer').prop('disabled', true);
+  
+  x = new clsStopwatch(last_value);
+  show();
+
+  // if this isn't the first cell clicked
+  if(last_id !== null) {
+    // close currently open cell
+    $("#" + last_id + " .duration-form").toggle();
+    $("#" + last_id + " .duration-display").toggle();
+
+    // save the value of the currently open input
+    var last_val = $("#" + last_id + " .duration-input").val();
+
+    // soft set the value of the cell that is about to close
+    if(last_val > 0) { 
+      $("#" + last_id + " .duration-display").html(last_val);
+    } else {
+      $("#" + last_id + " .duration-display").html('');
+    }
+  }  
+
+  // toggle cell clicked
+  $("#" + id + " .duration-display").toggle();
+  $("#" + id + " .duration-form").toggle();
+  $("#" + id + " .duration-input").focus(); // focus the open input
+  $("#" + id + " .duration-input").select(); // highlight the open input
+
+  last_id = id;  // save the id of the last cell clicked
+
+  return true;
+}
+
+function editCell(id) {
+  var duration_input = checkNumberInput($("#" + id + " .duration-input").val());
+
+  input_value = parseFloat(duration_input); // current input value
+
+  var col = id.split("_c")[1]; // get the column number ie the day of the week
+  var total_col = document.getElementById('total'+col).innerHTML;
+  var total = parseFloat(total_col); // get the total in the column
+  
+  total += input_value - last_value;
+  last_value = input_value; 
+
+  document.getElementById('total'+col).innerHTML = total;
+  
+  var table_total = 0;
+  for(var i = 1; i <= 7; i++) { //>
+    table_total += parseFloat(document.getElementById('total' + i).innerHTML);
+  }
+
+  document.getElementById('table_total').innerHTML = table_total;
+
+  return true;  
+}
+
+function submitDatePickerForm(username) {
+  var date_input = document.getElementById('date_picker_input').value;
+
+  window.location = '/timetracker/' + username + '/' + date_input;
+
+  return true;
+}
+
+function disableAddTaskCheck(ps, ts) {
+  if(ps && ts) {
+    // enable button
+    $('#add_task_button').prop('disabled', false);
+  } else {
+    // disable button
+    $('#add_task_button').prop('disabled', true);
+  }
+}
+
+
+/*
+    On Ready
+*/
+$(function() {
+  var idx = document.getElementById("id_project").selectedIndex;
+  project_selected = idx > 0 ? true : false;
+
+  idx = document.getElementById("id_task").selectedIndex;
+
+  task_selected = idx > 0 ? true : false;
+
+  disableAddTaskCheck(project_selected, task_selected);
+
+  $('#save_timer').prop('disabled', true);
+  $('#start_timer').prop('disabled', true);
+  $('#stop_timer').prop('disabled', true);
+});
+
+
+/*
+    Event Handlers
+*/
+$(document).on('click', function(e) {  
+  if(input_id !== "") {
+    input_value = parseFloat(checkNumberInput($("#" + input_id + " .duration-input").val())); // current input value       
+    if ( ($(e.target).parent().attr('class') != 'time-cell') && ($(e.target).parent().attr('class') != 'duration-form') && ($(e.target).children().attr('class') != 'duration-display') ) {
+      $("#" + input_id + " .duration-display").show();
+      $("#" + input_id + " .duration-form").hide();
+      $("#" + input_id + " .duration-display").html(input_value != 0 ? input_value : '');
+      last_id = null;
+    }
+  } 
+ }); 
+
+$("#id_project").change(function() {
+  var idx = $("#id_project").prop('selectedIndex');
+
+  project_selected = idx > 0 ? true : false;
+
+  disableAddTaskCheck(project_selected, task_selected);
+});
+
+$("#id_task").change(function() {
+  var idx = $("#id_task").prop('selectedIndex');
+
+  task_selected = idx > 0 ? true : false;
+
+  disableAddTaskCheck(project_selected, task_selected);
+});
+
+$("#id_category").change(function() {
+  var category_text = $("#id_category option:selected").text(); // this is the category name
+  var category_value = $("#id_category").val(); // this is the category id SO COOL!!   
+  var project_value = $("#id_project").val();
+
+  //window.location = '?category='+category_value+'&project='+project_value;
+
+  $.get('?category='+category_value+'&project='+project_value, function(data) {
+    $('#id_task').html($(data).find('#id_task').html());
+    console.log($(data).find('#id_task').html());
+    console.log('Success!');
+  });
+});
+
+
+/*
+    Set Initial Values
+*/
+$("#date_picker_input").datepicker({
+  dateFormat: "yy/mm/dd"
+});
+
+{% if cid %}
+  $("#id_category").val({{cid}});
+{% endif %}
+
+{% if pid %}
+  $("#id_project").val({{pid}});
+{% endif %}
+</script>
+{% endblock %}

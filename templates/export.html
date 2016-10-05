@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="get" action="">
+{{ form.as_p }}
+<input type="hidden" name="project_id" value="{{ project_id }}" />
+<input type="submit" value="Submit" />
+<form>
+<br/>
+<p style="color: red"><b>{{ error }}</b></p>
+
+<script>
+$("#start_date").datepicker({
+  dateFormat: "yy/mm/dd"
+});
+
+$("#end_date").datepicker({
+  dateFormat: "yy/mm/dd"
+});
+</script>
+{% endblock %}

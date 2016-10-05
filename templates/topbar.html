@@ -1,0 +1,30 @@
+{% block topbar %}
+<div class="header clearfix">
+  <nav>
+    <ul class="nav pull-right">
+      {% if user.is_authenticated %}
+      <li style="display: inline-block; margin-right: 1em;">
+        Hello, {{user.first_name}}
+      </li>
+      {% endif %}
+      <li style="display: inline-block;">
+        <a href="/admin">Admin</a>
+      </li>
+      <li style="display: inline-block; margin-right: 1em;">
+        <a href="/help">
+        Help <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+        </a>
+      </li>
+      {% if user.is_authenticated %}
+        <li style="display: inline-block;"><a id="logout_button" href="/logout/" class="btn btn-danger" role="button">Logout</a></li>
+      {% endif %}      
+    </ul>
+  </nav>
+  <a href="/" style="text-decoration: none;">
+  <h3 class="text-muted" style="display: inline-block;">
+    iTimeTracker
+  </h3>
+  <span class="glyphicon glyphicon-home" style="color: #777;"></span>
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block topbar%}
+  {% include 'topbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+img {
+	margin: 1.5em 0px;
+}
+</style>
+
+<div class="documentation" style="margin-top: 1em;">
+
+<h1 style="text-align: center;">iTimeTracker Instructions</h1>
+<br/>
+<h3>Application Overview</h3>
+<p>iTimeTracker is iMarketResearch’s internal application for keeping track of each employee’s time and how they use it. Each employee is able to log in to their own personal account and enter in the time they spent on a given task for a given project. </p>
+<p>You will first be presented with a login screen, use your provided credentials to login. The default credentials for each employee are:</p>
+<p>Username: (full first name)</p>
+<p>Password: imarketresearch</p>
+<p>Credentials can be changed at a later date.</p>
+<h3>Key Features</h3>
+<p>This is the heart of iTimeTracker, the times table page. Highlighted are the user interactive elements outside of the times table itself. </p>
+<div style="text-align: center;"><img src="{% static 'itimetracker/itt7.png' %}" style="width: 75%;" /></div>
+<h4>1. Logout</h4>
+<p>Click this button to be logged out of your account and returned to the login screen.</p>
+<h4>2. Date Selection</h4>
+<div style="text-align: center;"><img src="{% static 'itimetracker/itt3.PNG' %}" /></div>
+<p>Clicking the Date textbox will display a calendar. Select a day on the calendar to go to that date’s corresponding week. Clicking on any day of the week Monday through Sunday will go to the same week. For example, clicking on May 13 will take you to the same week as May 9, 10, 11, 12, and 14. However, clicking on May 8 will take you to the previous week as each week starts on Monday and ends on Sunday. Once a date is selected, the times table automatically updates itself to the selected week.</p>
+<h4>3. Timer</h4>
+<div style="text-align: center;"><img src="{% static 'itimetracker/itt8.PNG' %}" /></div>
+<p>The timer is essentially a stop watch. It allows you to accurately track the amount of time spent on a task for a given project. To use the timer, select the cell corresponding to the current day of the week and the task on which you are currently working. To begin the timer press the “Start” button. Clicking on another cell in the table while the timer is running will cause the timer to reset so be careful! Once you are done said task or you need to switch to a different task, press the “Stop” button and then the “Enter Time” button to populate the corresponding cell with the new amount of time. This will not save the time entered into the database!</p>
+<h4>4. Project and Task Selector</h4>
+<p>This form allows users to add a row to the times table to enter in time spent on a given task within a given project. The allowable tasks are broken into categories for ease of use. The user first selects the project they are working on from the dropdown, and then the category that their task is within. This will dynamically allocate the appropriate tasks to the tasks dropdown. Once a task is chosen, the user can then press the “Add Task” button to add a new row to the times table.</p>
+<h4>5. Delete Row Button</h4>
+<p>Eventually the times table will have old projects that you are no longer working on. To remove these rows from the table. Click on the red “X” under the “Delete?” column. This will hide the row in the times table for the current and future weeks. This will not delete the time values in the row, i.e. you can add the exact task from the same project back to the times table and your time values will still be there. The task will be still be viewable in the past weeks.</p>
+<h4>6. Save Table Button</h4>
+<p>Saves your values entered in the times table. If you mis-entered a time, you can change the value and save again. If you enter values in the table and then switch the date that you are viewing even if the new date is in the same week, your values will not be saved.</p>
+<br/>
+<h3>Times Table</h3>
+<div style="text-align: center;"><img style="width: 75%;" src="{% static 'itimetracker/itt9.PNG' %}" /></div>
+<p>To enter times into the table, click on the cell corresponding to the date and task for the project you want to enter your time. Once clicked, a text box will appear and you can fill in the amount of time you spent on that day on the given task. You can enter in time at intervals of 0.25. Once you have finished entering in your times for the week, press the blue “Save Table” button.</p>
+<h3>Error Reporting</h3>
+<p>If you ever experience what you believe to be an error within the application, report it to a developer with as much detail as possible. If you come across an unexpected result, send an email to <a href="mailto:ianrockefeller@imarketresearch.com?subject=iTimeTracker Error Report">ianrockefeller@imarketresearch.com</a> along with instructions to recreate the issue, e.g. what you entered, clicked, in what order, and screenshots if they may seem helpful.</p>
+</div>
+{% if user.is_superuser %}
+<h3>Administrative Portal</h3>
+<p>To create, update and delete records from the database, the administrative portal allows users to manipulate the data in the database. Common tasks that might be done are adding a new user, adding a project, adding a client, closing a project, etc.</p>
+<h4>Overview</h4>
+<p>To access the admin portal you must first have administrative rights then go to:</p>
+<p><a href="/admin/">http://time.imarketresearch.com/admin/</a></p>
+<p>This link can also be accessed from the main page of the application by clicking "Admin"</p>
+<div style="text-align: center;"><img style="width: 75%;" src="{% static 'itimetracker/itt10.png' %}" /></div
+<p>You will be presented with a screen such as the one below. From here, click the “+ Add” button for the table you want to edit.</p>
+<div style="text-align: center;"><img src="{% static 'itimetracker/itt5.PNG' %}" style="width: 50%;" /></div>
+<h4>Exporting Data</h4>
+<p>Data related to employee time spent on a given project between a given date range can be exported out of the application into an Excel workbook. Multiple projects can be exported into one workbook organized by worksheets, i.e. one project per worksheet. </p>
+<p>To export a spreadsheet, first click on “Projects” in the main admin page.</p>
+<p>Select as many projects as you would like to export for a given date range. If you would like to specify a date range for a project you will need to repeat this process for each desired date range.</p>
+<p>From the “Action” dropdown, select “Export selected projects” and press “Go.” On the next screen you will be able to set start and end dates to export. Press “Submit” once a date range is given.</p>
+<div style="text-align: center;"><img src="{% static 'itimetracker/itt6.png' %}" style="width: 33%;" /></div>
+{% endif %}
+<br/>
+<br/>
+<br/>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% load staticfiles %}
+
+<html>
+  <head>
+    <title>iTimeTracker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <style>
+body {
+  /*margin-top: 1.5em;*/
+}
+
+.duration-form {
+  display: none;
+}
+
+.duration-input {
+  text-align: right;
+}
+
+#project_task_form select {
+  width: 200px;
+}
+
+#login_form {
+  text-align: center;
+  margin: 2em;
+}
+
+/* Custom page header */
+.header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 40px;
+}
+
+#wrapper {
+  margin: 0 auto;
+}
+
+#content {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+th {
+  background-color: #007ac4;
+  color: white;
+}
+
+#user_header {
+  margin-top: 0;
+  margin-bottom: 13px;
+}
+
+#time_table tr:not(.no-hover):hover {
+  background-color: #f7f7f9;
+}
+
+#logout_button:hover {
+  background-color: #ac2925;
+}
+
+#login_nav_button:hover {
+  background-color: #286090;
+}
+
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+  border: 1px solid orange;
+}
+
+.leftarrow, .rightarrow {
+  font-size: 7em;
+  /*font-weight: 800;*/
+  
+  cursor: pointer;
+  position: relative;
+  top: -32.5px;
+}
+
+.leftarrow a:hover, .rightarrow a:hover {
+  color: #666;
+}
+
+.leftarrow {
+  padding-right: 20px;
+}
+
+.rightarrow {
+  padding-left: 20px;
+}
+
+.leftarrow a, .rightarrow a {
+  text-decoration: none;
+  color: #ccc;
+}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div class="container" id="content">
+        {% block topbar %}
+        {% endblock %}
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </body>
+</html>
